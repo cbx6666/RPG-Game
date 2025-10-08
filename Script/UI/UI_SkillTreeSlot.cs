@@ -50,6 +50,7 @@ public class UI_SkillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
     {
         if (unlocked)
         {
+            ui.CreateUI_PopUpText("技能已解锁");
             AudioManager.instance.PlaySFX(29);
             return false;
         }
@@ -58,6 +59,7 @@ public class UI_SkillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
         {
             if (!shouldBeUnlocked[i].unlocked)
             {
+                ui.CreateUI_PopUpText("需要前置技能");
                 AudioManager.instance.PlaySFX(29);
                 return false;
             }
@@ -67,6 +69,7 @@ public class UI_SkillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
         {
             if (shouldBeLocked[i].unlocked)
             {
+                ui.CreateUI_PopUpText("技能冲突");
                 AudioManager.instance.PlaySFX(29);
                 return false;
             }
@@ -74,6 +77,7 @@ public class UI_SkillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
 
         if (!PlayerManager.instance.HaveEnoughMoney(skillPrice))
         {
+            ui.CreateUI_PopUpText("金币不足");
             AudioManager.instance.PlaySFX(29);
             return false;
         }
@@ -84,6 +88,7 @@ public class UI_SkillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
 
         ui.skillToolTip.HideSkillToolTip();
 
+        ui.CreateUI_PopUpText("技能解锁成功");
         AudioManager.instance.PlaySFX(26);
 
         return true;
@@ -92,7 +97,7 @@ public class UI_SkillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
     public void OnPointerEnter(PointerEventData eventData)
     {
         // 先显示提示框，便于获取其RectTransform尺寸
-        ui.skillToolTip.ShowSkillToolTip(skillDescription, skillName);
+        ui.skillToolTip.ShowSkillToolTip(skillDescription, skillName, "消耗 " + skillPrice.ToString() + " 金币");
 
         // 鼠标屏幕坐标
         Vector2 mousePosition = Input.mousePosition;

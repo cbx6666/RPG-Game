@@ -25,7 +25,8 @@ public class ItemObject : MonoBehaviour
         if (!Inventory.instance.CanAddItemToInventory() && itemData.itemType == ItemType.Equipment)
         {
             rb.velocity = new Vector2(0, 7);
-            return; // 背包满了，不拾取
+            PlayerManager.instance.player.fx.CreatePopUpText("背包已满");
+            return;
         }
 
         AudioManager.instance.PlaySFX(32);

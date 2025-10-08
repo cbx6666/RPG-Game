@@ -60,7 +60,10 @@ public class Clone_Skill : Skill
 
         GameObject newClone = Instantiate(clonePrefab);
 
-        newClone.GetComponent<Clone_Skill_Controller>().SetupClone(_clonePosition, cloneDuration, _offset, FindClosetEnemy(_clonePosition), canDuplicateClone, chanceToDuplicate, player, clone);
+		// 目标点可能在延迟期间被销毁，做空保护并回退到玩家
+		var spawnTransform = _clonePosition != null ? _clonePosition : player.transform;
+		var target = FindClosetEnemy(spawnTransform);
+		newClone.GetComponent<Clone_Skill_Controller>().SetupClone(spawnTransform, cloneDuration, _offset, target, canDuplicateClone, chanceToDuplicate, player, clone);
     }
 
     public void CreateCloneOnDashStart()
@@ -84,7 +87,7 @@ public class Clone_Skill : Skill
     private IEnumerator CreateCloneWithDelay(Transform _transform, Vector3 _offset)
     {
         yield return new WaitForSeconds(0.4f);
-        CreateClone(_transform, _offset);
+		CreateClone(_transform != null ? _transform : (player != null ? player.transform : transform), _offset);
     }
 
     private void UnlockMirage()

@@ -41,6 +41,10 @@ public class UI_CraftList : MonoBehaviour, IPointerDownHandler
     {
         SetupCraftList();
 
+        var ui = GetComponentInParent<UI>();
+        if (ui != null && ui.craftWindow != null)
+            ui.craftWindow.SetupCraftWindow(craftEquipment[0]);
+
         AudioManager.instance.PlaySFX(24);
     }
 

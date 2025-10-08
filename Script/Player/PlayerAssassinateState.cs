@@ -5,6 +5,7 @@ public class PlayerAssassinateState : PlayerState
 {
     private float afterImageTimer;
     private float afterImageCooldown = 0.03f;
+    private float defaultGravity;
 
     public PlayerAssassinateState(Player _player, PlayerStateMachine _stateMachine, string animBoolName) : base(_player, _stateMachine, animBoolName)
     {
@@ -14,6 +15,13 @@ public class PlayerAssassinateState : PlayerState
     public override void Enter()
     {
         base.Enter();
+
+        defaultGravity = rb.gravityScale;
+        rb.gravityScale = 0;
+
+        player.stats.MakeInvincible(true);
+        player.stats.critPower.AddModifier(50);
+        player.stats.critChance.AddModifier(100);
 
         player.SetVelocity(player.facingDir * 15, 0);
 
@@ -27,6 +35,12 @@ public class PlayerAssassinateState : PlayerState
     public override void Exit()
     {
         base.Exit();
+
+        rb.gravityScale = defaultGravity;
+        
+        player.stats.MakeInvincible(false);
+        player.stats.critChance.RemoveModifier(100);
+        player.stats.critChance.RemoveModifier(50);
     }
 
     public override void Update()

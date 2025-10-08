@@ -1,18 +1,26 @@
 using UnityEngine;
 
+/// <summary>
+/// 玩家管理器 - 管理玩家的核心数据
+/// 负责货币、经验值、等级系统和存档管理
+/// 实现ISaveManager接口，支持玩家数据的保存和加载
+/// </summary>
 public class PlayerManager : MonoBehaviour, ISaveManager
 {
-    public static PlayerManager instance;
+    public static PlayerManager instance;                  // 单例实例
 
     [Header("Player info")]
-    public Player player;
-    public int currency;
-    public int currentExperience;
-    public int playerLevel;
+    public Player player;                                  // 玩家对象
+    public int currency;                                   // 货币数量
+    public int currentExperience;                          // 当前经验值
+    public int playerLevel;                                // 玩家等级
 
     // 数据加载完成事件
-    public System.Action OnPlayerDataLoaded;
+    public System.Action OnPlayerDataLoaded;              // 玩家数据加载完成事件
 
+    /// <summary>
+    /// 初始化单例
+    /// </summary>
     private void Awake()
     {
         if (instance != null)
@@ -21,6 +29,11 @@ public class PlayerManager : MonoBehaviour, ISaveManager
             instance = this;
     }
 
+    /// <summary>
+    /// 检查是否有足够的货币
+    /// </summary>
+    /// <param name="price">价格</param>
+    /// <returns>是否有足够货币</returns>
     public bool HaveEnoughMoney(int price)
     {
         if (price > currency)
@@ -30,6 +43,10 @@ public class PlayerManager : MonoBehaviour, ISaveManager
         return true;
     }
 
+    /// <summary>
+    /// 加载玩家数据
+    /// </summary>
+    /// <param name="data">游戏数据</param>
     public void LoadData(GameData data)
     {
         this.currency = data.currency;
@@ -47,6 +64,10 @@ public class PlayerManager : MonoBehaviour, ISaveManager
         ApplyPlayerData();
     }
 
+    /// <summary>
+    /// 延迟加载数据协程
+    /// </summary>
+    /// <returns></returns>
     private System.Collections.IEnumerator DelayedLoadData()
     {
         // 等待player初始化完成
@@ -59,6 +80,9 @@ public class PlayerManager : MonoBehaviour, ISaveManager
         ApplyPlayerData();
     }
 
+    /// <summary>
+    /// 应用玩家数据
+    /// </summary>
     private void ApplyPlayerData()
     {
         if (player != null && player.stats != null)
@@ -69,8 +93,8 @@ public class PlayerManager : MonoBehaviour, ISaveManager
             int additionalLevels = playerLevel - 1; // 减去初始1级
             if (additionalLevels > 0)
             {
-                player.stats.strength.AddModifier(3 * additionalLevels);
-                player.stats.agility.AddModifier(1 * additionalLevels);
+                player.stats.strength.AddModifier(2 * additionalLevels);
+                player.stats.agility.AddModifier(2 * additionalLevels);
                 player.stats.intelligence.AddModifier(2 * additionalLevels);
                 player.stats.vitality.AddModifier(10 * additionalLevels);
             }
@@ -82,6 +106,10 @@ public class PlayerManager : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 保存玩家数据
+    /// </summary>
+    /// <param name="data">游戏数据</param>
     public void SaveData(ref GameData data)
     {
         data.currency = this.currency;
@@ -89,9 +117,15 @@ public class PlayerManager : MonoBehaviour, ISaveManager
         data.playerLevel = this.playerLevel;
     }
 
+    /// <summary>
+    /// 增加经验值
+    /// </summary>
+    /// <param name="amount">经验值数量</param>
     public void AddExperience(int amount)
     {
         currentExperience += amount;
+
+        AudioManager.instance.PlaySFX(21);
 
         // 检查升级
         while (currentExperience >= 200 * (playerLevel / 5 + 1))

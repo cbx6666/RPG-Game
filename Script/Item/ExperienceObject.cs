@@ -73,8 +73,6 @@ public class ExperienceObject : MonoBehaviour
 
         PlayerManager.instance.AddExperience(experienceAmount);
 
-        AudioManager.instance.PlaySFX(21);
-
         StartCoroutine(DestroyMe());
     }
 

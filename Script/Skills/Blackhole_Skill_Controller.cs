@@ -42,6 +42,8 @@ public class Blackhole_Skill_Controller : MonoBehaviour
 
     private void Update()
     {
+		CleanTargets();
+
         cloneAttackTimer -= Time.deltaTime;
         blackholeTimer -= Time.deltaTime;
 
@@ -49,7 +51,7 @@ public class Blackhole_Skill_Controller : MonoBehaviour
         {
             blackholeTimer = Mathf.Infinity;
 
-            if (targets.Count > 0)
+			if (targets.Count > 0)
                 ReleaseCloneAttack();
             else
             {
@@ -57,6 +59,14 @@ public class Blackhole_Skill_Controller : MonoBehaviour
                 FinishBlackholeAbility();
             }
         }
+
+		// 若已进入克隆攻击阶段，但所有目标在过程中死亡/销毁，则立即结束黑洞
+		if (cloneAttackReleased && targets.Count == 0 && amountOfAttacks > 0)
+		{
+			DestroyHotKeys();
+			Invoke("FinishBlackholeAbility", 1);
+			return;
+		}
 
         if (Input.GetKeyDown(KeyCode.V))
             ReleaseCloneAttack();
@@ -83,7 +93,7 @@ public class Blackhole_Skill_Controller : MonoBehaviour
         DestroyHotKeys();
         cloneAttackReleased = true;
         canCreateHotKeys = false;
-
+        
         if (canPlayerDisappear)
         {
             canPlayerDisappear = false;
@@ -97,7 +107,8 @@ public class Blackhole_Skill_Controller : MonoBehaviour
         {
             cloneAttackTimer = cloneAttackCooldown;
 
-            if (targets.Count <= 0)
+			CleanTargets();
+			if (targets.Count <= 0)
                 return;
             int randomIndex = Random.Range(0, targets.Count);
 
@@ -108,10 +119,10 @@ public class Blackhole_Skill_Controller : MonoBehaviour
                 SkillManager.instance.crystal.CreateCrystal();
                 SkillManager.instance.crystal.CurrentCrystalChooseRandomTarget();
             }
-            else
+			else
             {
-                if (targets[randomIndex] != null)
-                    SkillManager.instance.clone.CreateClone(targets[randomIndex], new Vector3(xOffset, 0));
+				if (targets[randomIndex] != null)
+					SkillManager.instance.clone.CreateClone(targets[randomIndex], new Vector3(xOffset, 0));
             }
 
             amountOfAttacks--;
@@ -120,6 +131,11 @@ public class Blackhole_Skill_Controller : MonoBehaviour
                 Invoke("FinishBlackholeAbility", 1);
         }
     }
+
+	private void CleanTargets()
+	{
+		targets.RemoveAll(t => t == null || (t.GetComponent<Enemy>() != null && t.GetComponent<Enemy>().isDead));
+	}
 
     private void FinishBlackholeAbility()
     {
@@ -144,16 +160,24 @@ public class Blackhole_Skill_Controller : MonoBehaviour
             collision.GetComponent<Enemy>().FreezeTime(true);
 
             CreateHotKey(collision);
+
+            PlayerManager.instance.player.stats.DoMagicalDamage(collision.GetComponent<CharacterStats>(), transform);
         }
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.GetComponent<Enemy>() != null)
+        if (collision.GetComponent<Enemy>() != null && !collision.GetComponent<Enemy>().isDead)
             collision.GetComponent<Enemy>().FreezeTime(true);
     }
 
-    private void OnTriggerExit2D(Collider2D collision) => collision.GetComponent<Enemy>()?.FreezeTime(false);
+    private void OnTriggerExit2D(Collider2D collision) 
+    {
+        collision.GetComponent<Enemy>()?.FreezeTime(false);
+
+        if (collision.GetComponent<Enemy>() != null)
+            PlayerManager.instance.player.stats.DoMagicalDamage(collision.GetComponent<CharacterStats>(), transform);
+    }
 
     private void CreateHotKey(Collider2D collision)
     {

@@ -2,37 +2,48 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 冲刺技能 - 继承自Skill基类
+/// 实现玩家的冲刺移动、冲刺分身和冲刺攻击功能
+/// 支持技能解锁和事件系统
+/// </summary>
 public class Dash_Skill : Skill
 {
     [Header("Dash Info")]
-    public float dashSpeed;
-    public float dashDuration;
+    public float dashSpeed;                                // 冲刺速度
+    public float dashDuration;                            // 冲刺持续时间
 
     [HideInInspector]
-    public float dashDir;
+    public float dashDir;                                  // 冲刺方向
 
     [Header("Dash")]
-    public bool dash;
-    [SerializeField] private UI_SkillTreeSlot dashUnlockButton;
+    public bool dash;                                      // 是否解锁冲刺
+    [SerializeField] private UI_SkillTreeSlot dashUnlockButton; // 冲刺解锁按钮
 
     [Header("Clone on dash")]
-    public bool cloneOnDash;
-    [SerializeField] private UI_SkillTreeSlot cloneOnDashUnlockButton;
+    public bool cloneOnDash;                              // 是否冲刺时创建分身
+    [SerializeField] private UI_SkillTreeSlot cloneOnDashUnlockButton; // 冲刺分身解锁按钮
 
     [Header("Dash attack")]
-    public bool dashAttack;
-    [SerializeField] private UI_SkillTreeSlot dashAttackUnlockButton;
+    public bool dashAttack;                               // 是否解锁冲刺攻击
+    [SerializeField] private UI_SkillTreeSlot dashAttackUnlockButton; // 冲刺攻击解锁按钮
 
-    public event Action OnDashUnlocked;
-    public event Action OnCloneOnDashUnlock;
-    public event Action OnDashAttackUnlock;
+    // 技能解锁事件
+    public event Action OnDashUnlocked;                  // 冲刺解锁事件
+    public event Action OnCloneOnDashUnlock;             // 冲刺分身解锁事件
+    public event Action OnDashAttackUnlock;              // 冲刺攻击解锁事件
 
-    public event Action OnDashUsed;
+    // 技能使用事件
+    public event Action OnDashUsed;                      // 冲刺使用事件
 
+    /// <summary>
+    /// 初始化冲刺技能
+    /// </summary>
     protected override void Start()
     {
         base.Start();
 
+        // 绑定技能解锁按钮事件
         dashUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockDash);
         cloneOnDashUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockCloneOnDash);
         dashAttackUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockCloneAttack);
@@ -41,6 +52,10 @@ public class Dash_Skill : Skill
         StartCoroutine(DelayedInitialization());
     }
     
+    /// <summary>
+    /// 延迟初始化协程
+    /// </summary>
+    /// <returns></returns>
     private System.Collections.IEnumerator DelayedInitialization()
     {
         // 等待一帧，确保所有保存数据都已加载
@@ -51,6 +66,7 @@ public class Dash_Skill : Skill
         cloneOnDash = cloneOnDashUnlockButton.unlocked;
         dashAttack = dashAttackUnlockButton.unlocked;
 
+        // 触发已解锁技能的事件
         if (dash)
             OnDashUnlocked?.Invoke();
         if (cloneOnDash)
@@ -59,6 +75,9 @@ public class Dash_Skill : Skill
             OnDashAttackUnlock?.Invoke();
     }
 
+    /// <summary>
+    /// 使用冲刺技能
+    /// </summary>
     public override void UseSkill()
     {
         base.UseSkill();
@@ -66,6 +85,9 @@ public class Dash_Skill : Skill
         OnDashUsed?.Invoke();
     }
 
+    /// <summary>
+    /// 解锁冲刺技能
+    /// </summary>
     private void UnlockDash()
     {
         if (dashUnlockButton.CanUnlockSkillSlot() && dashUnlockButton.unlocked)
@@ -75,6 +97,9 @@ public class Dash_Skill : Skill
         }
     }
 
+    /// <summary>
+    /// 解锁冲刺分身技能
+    /// </summary>
     private void UnlockCloneOnDash()
     {
         if (cloneOnDashUnlockButton.CanUnlockSkillSlot() && cloneOnDashUnlockButton.unlocked)
@@ -84,6 +109,9 @@ public class Dash_Skill : Skill
         }
     }
 
+    /// <summary>
+    /// 解锁冲刺攻击技能
+    /// </summary>
     private void UnlockCloneAttack()
     {
         if (dashAttackUnlockButton.CanUnlockSkillSlot() && dashAttackUnlockButton.unlocked)

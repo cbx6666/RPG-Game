@@ -15,6 +15,8 @@ public class SkeletonBattleState : EnemyState
     {
         base.Enter();
 
+        enemy.isKnocked = false;
+
         player = PlayerManager.instance.player.transform;
         stateTimer = enemy.battleTime;
     }

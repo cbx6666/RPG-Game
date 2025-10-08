@@ -19,6 +19,8 @@ public class PlayerDashState : PlayerState
     {
         base.Enter();
 
+        player.stats.MakeInvincible(true);
+
         if (player.skill.clone.CanUseSkill() && SkillManager.instance.dash.cloneOnDash)
         {
             canCreateClone = true;
@@ -35,6 +37,8 @@ public class PlayerDashState : PlayerState
     public override void Exit()
     {
         base.Exit();
+
+        player.stats.MakeInvincible(false);
 
         if (canCreateClone)
         {

@@ -15,7 +15,7 @@ public class SkeletonBlockedState : EnemyState
     {
         base.Enter();
 
-        stateTimer = 0.5f;
+        stateTimer = 1.5f;
     }
 
     public override void Update()

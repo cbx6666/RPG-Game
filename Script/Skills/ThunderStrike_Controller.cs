@@ -30,7 +30,7 @@ public class ThunderStrike_Controller : MonoBehaviour
             transform.localScale = new Vector3(3, 3);
 
             triggered = true;
-            targetStats.TakeDamage(damage, transform, true);
+            targetStats.TakeDamage(damage, transform, true, true);
             AudioManager.instance.PlaySFX(18);
             targetStats.ApplyShock(true);
             anim.SetTrigger("Hit");

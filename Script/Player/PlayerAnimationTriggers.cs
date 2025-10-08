@@ -30,6 +30,11 @@ public class PlayerAnimationTriggers : MonoBehaviour
                 if (Inventory.instance.GetEquipment(EquipmentType.Weapon) && Inventory.instance.CanUseWeapon())
                     Inventory.instance.GetEquipment(EquipmentType.Weapon).ExecuteItemEffect(hit.transform);
             }
+
+            if (hit.GetComponent<Chest>() != null&& !hit.GetComponent<Chest>().opened)
+            {
+                hit.GetComponent<Chest>().OpenChest();
+            }
         }
     }
 

@@ -10,6 +10,14 @@ public class UI_CraftWindow : MonoBehaviour
     [SerializeField] private Button craftButton;
 
     [SerializeField] private Image[] materialImage;
+    [SerializeField] private UI_MaterialImage[] materialImageUI;
+
+    private UI ui;
+
+    private void Start()
+    {
+        ui = GetComponentInParent<UI>();
+    }
 
     public void SetupCraftWindow(ItemData_Equipment data)
     {
@@ -22,6 +30,7 @@ public class UI_CraftWindow : MonoBehaviour
         {
             materialImage[i].color = Color.clear;
             materialImage[i].GetComponentInChildren<TextMeshProUGUI>().color = Color.clear;
+            materialImageUI[i].SetMaterialName("");
         }
 
         if (data.craftingMaterials == null)
@@ -43,6 +52,7 @@ public class UI_CraftWindow : MonoBehaviour
 
             materialSlotText.text = mat.stackSize.ToString();
             materialSlotText.color = Color.white;
+            materialImageUI[i].SetMaterialName(mat.data.itemName);
         }
 
         if (itemIcon != null)
@@ -53,6 +63,12 @@ public class UI_CraftWindow : MonoBehaviour
             itemDescription.text = data.GetDescription();
 
         if (craftButton != null)
-            craftButton.onClick.AddListener(() => Inventory.instance.CanCraft(data, data.craftingMaterials));
+            craftButton.onClick.AddListener(() => {
+                bool canCraft = Inventory.instance.CanCraft(data, data.craftingMaterials);
+                if (canCraft)
+                    ui.CreateUI_PopUpText("合成成功");
+                else
+                    ui.CreateUI_PopUpText("合成失败，材料不足");
+            });
     }
 }

@@ -1,7 +1,10 @@
+using UnityEngine;
+
 public class PlayerBlackholeState : PlayerState
 {
     private float flyTime = 0.4f;
     private bool skillUsed;
+    private int damageBuff;
 
     private float defaultGravity;
 
@@ -20,6 +23,12 @@ public class PlayerBlackholeState : PlayerState
         stateTimer = flyTime;
         rb.gravityScale = 0;
 
+        player.stats.MakeInvincible(true);
+        damageBuff = Mathf.RoundToInt(player.stats.damage.GetValue() * 1.2f);
+        player.stats.damage.AddModifier(damageBuff);
+        player.stats.critChance.AddModifier(40);
+        player.stats.critPower.AddModifier(40);
+
         AudioManager.instance.PlaySFX(36);
     }
 
@@ -27,8 +36,14 @@ public class PlayerBlackholeState : PlayerState
     {
         base.Exit();
 
+        player.stats.MakeInvincible(false);
+
         rb.gravityScale = defaultGravity;
+
         player.MakeTransprent(false);
+        player.stats.damage.RemoveModifier(damageBuff);
+        player.stats.critChance.RemoveModifier(40);
+        player.stats.critPower.RemoveModifier(40);
 
         AudioManager.instance.PlaySFX(37);
     }

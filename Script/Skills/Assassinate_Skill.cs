@@ -16,16 +16,16 @@ public class Assassinate_Skill : Skill
         base.Start();
 
         assassinateUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockAssassinate);
-        
+
         // 延迟初始化，确保保存系统已经加载完成
         StartCoroutine(DelayedInitialization());
     }
-    
+
     private System.Collections.IEnumerator DelayedInitialization()
     {
         // 等待一帧，确保所有保存数据都已加载
         yield return null;
-        
+
         // 根据技能槽的解锁状态初始化技能状态
         assassinate = assassinateUnlockButton.unlocked;
 
@@ -37,9 +37,6 @@ public class Assassinate_Skill : Skill
     public override void UseSkill()
     {
         base.UseSkill();
-
-        foreach (var item in player.assassinateEffects)
-            item.ExecuteEffect(player.transform);
 
         MoveToEnemy();
 

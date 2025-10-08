@@ -8,9 +8,6 @@ public class DashAttack_Skill : Skill
     {
         base.UseSkill();
 
-        foreach (var item in player.dashAttackEffects)
-            item.ExecuteEffect(player.transform);
-
         OnDashAttackUsed?.Invoke();
     }
 }

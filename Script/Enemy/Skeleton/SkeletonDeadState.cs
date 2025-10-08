@@ -13,11 +13,12 @@ public class SkeletonDeadState : EnemyState
 
         AudioManager.instance.PlaySFX(12);
 
+        enemy.FreezeTime(false);
+
         enemy.isDead = true;
         enemy.CloseCounterAttackWindow();
         enemy.GetComponentInChildren<UI_HealthBar>().DestroyMe();
         enemy.GetComponentInChildren<UI_EnduranceBar>().DestroyMe();
-        enemy.PlayerGetCurrency();
     }
 
     public override void Update()
@@ -29,6 +30,7 @@ public class SkeletonDeadState : EnemyState
         if (triggerCalled)
             enemy.SelfDestroy();
     }
+
     public override void Exit()
     {
         base.Exit();

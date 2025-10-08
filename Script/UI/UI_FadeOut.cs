@@ -9,7 +9,23 @@ public class UI_FadeOut : MonoBehaviour
         anim = GetComponent<Animator>();
     }
 
-    public void FadeOut() => anim.SetTrigger("fadeOut");
+    public void FadeOut()
+    {
+        if (anim == null)
+            anim = GetComponent<Animator>();
 
-    public void FadeIn() => anim.SetTrigger("fadeIn");
+        // 使用受Time.timeScale影响的更新（正常时间）
+        anim.updateMode = AnimatorUpdateMode.Normal;
+        anim.SetTrigger("fadeOut");
+    }
+
+    public void FadeIn()
+    {
+        if (anim == null)
+            anim = GetComponent<Animator>();
+
+        // 使用不受Time.timeScale影响的更新（不受暂停影响）
+        anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+        anim.SetTrigger("fadeIn");
+    }
 }

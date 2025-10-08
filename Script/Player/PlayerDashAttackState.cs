@@ -9,6 +9,9 @@ public class PlayerDashAttackState : PlayerState
     {
         base.Enter();
 
+        player.stats.MakeInvincible(true);
+        player.stats.critChance.AddModifier(100);
+
         player.ZeroVelocity();
 
         AudioManager.instance.PlaySFX(0);
@@ -17,6 +20,9 @@ public class PlayerDashAttackState : PlayerState
     public override void Exit()
     {
         base.Exit();
+
+        player.stats.MakeInvincible(false);
+        player.stats.critChance.RemoveModifier(100);
     }
 
     public override void Update()

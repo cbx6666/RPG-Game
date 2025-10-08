@@ -142,14 +142,9 @@ public class ItemData_Equipment : ItemData
         AddItemDescription(magicResistence, "魔法抗性");
         AddItemDescription(evasion, "闪避率");
 
-        if (descriptionLength < 5)
-        {
-            for (int i = 0; i < 5 - descriptionLength; i++)
-            {
-                builder.AppendLine();
-                builder.Append("");
-            }
-        }
+       
+        builder.AppendLine();
+        builder.Append("");
 
         if (!string.IsNullOrEmpty(itemEffectDescription))
         {

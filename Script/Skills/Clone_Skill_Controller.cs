@@ -54,8 +54,14 @@ public class Clone_Skill_Controller : MonoBehaviour
         chanceToDuplicate = _chanceToDuplicate;
 
         float increaseDamage = _increaseDamage ? 1.5f : 0.6f;
-        int damage = Mathf.RoundToInt(player.GetComponent<CharacterStats>().damage.GetValue() * increaseDamage);
+        int damage = Mathf.RoundToInt((player.GetComponent<CharacterStats>().damage.GetValue() + 5 * player.GetComponent<CharacterStats>().strength.GetValue()) * increaseDamage);
         cloneStats.damage.AddModifier(damage);
+
+        // 继承玩家的属性
+        PlayerStats playerStats = player.GetComponent<PlayerStats>();
+        cloneStats.critChance.AddModifier(playerStats.critChance.GetValue());
+        cloneStats.critPower.SetValue(playerStats.critPower.GetValue());
+        cloneStats.intelligence.AddModifier(playerStats.intelligence.GetValue());
 
         switch (comboCounter)
         {

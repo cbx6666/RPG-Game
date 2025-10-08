@@ -18,14 +18,21 @@ public class Burn_Controller : MonoBehaviour
 
     private IEnumerator ExplodeDamage(PlayerStats playerStats, EnemyStats enemyTarget)
     {
+        if (playerStats == null || enemyTarget == null)
+            yield break;
+
         playerStats.DoMagicalDamage(enemyTarget, transform, ElementType.Fire);
 
         yield return new WaitForSeconds(0.5f);
 
+        if (enemyTarget == null)
+            yield break;
         playerStats.DoMagicalDamage(enemyTarget, transform, ElementType.Fire);
 
         yield return new WaitForSeconds(0.25f);
 
+        if (enemyTarget == null)
+            yield break;
         playerStats.DoMagicalDamage(enemyTarget, transform, ElementType.Fire);
     }
 

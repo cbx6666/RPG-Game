@@ -8,6 +8,8 @@ public class SkeletonMoveState : SkeletonGroundedState
     public override void Enter()
     {
         base.Enter();
+
+        enemy.isKnocked = false;
     }
 
     public override void Exit()

@@ -3,7 +3,7 @@ using UnityEngine;
 public class Enemy_Skeleton : Enemy
 {
     #region States
-    public SkeletonIdelState idleState { get; private set; }
+    public SkeletonIdleState idleState { get; private set; }
     public SkeletonMoveState moveState { get; private set; }
     public SkeletonBattleState battleState { get; private set; }
     public SkeletonAttackState attackState { get; private set; }
@@ -17,7 +17,7 @@ public class Enemy_Skeleton : Enemy
     {
         base.Awake();
 
-        idleState = new SkeletonIdelState(this, stateMachine, "Idle", this);
+        idleState = new SkeletonIdleState(this, stateMachine, "Idle", this);
         moveState = new SkeletonMoveState(this, stateMachine, "Move", this);
         battleState = new SkeletonBattleState(this, stateMachine, "Move", this);
         attackState = new SkeletonAttackState(this, stateMachine, "Attack", this);
@@ -42,6 +42,9 @@ public class Enemy_Skeleton : Enemy
 
         if (enemyStats != null && enemyStats.currentEndurance <= 0 && stateMachine.currentState != stunnedState)
             stateMachine.ChangeState(stunnedState);
+
+        if (isDead && stateMachine.currentState != deadState)
+            SelfDestroy();
     }
 
     public override bool EnemyCanBeBlocked()

@@ -11,11 +11,15 @@ public class PlayerStats : CharacterStats
         player = GetComponent<Player>();
     }
 
-    public override void TakeDamage(int _damage, Transform _attacker, bool _canDoDamage)
+    public override void TakeDamage(int _damage, Transform _attacker, bool _canDoDamage, bool _canCrit)
     {
-        base.TakeDamage(_damage, _attacker, _canDoDamage);
+        base.TakeDamage(_damage, _attacker, _canDoDamage, _canCrit);
 
         player.DamageEffect(_attacker, true, true);
+
+        TakeDamageFX(_canCrit);
+
+        player.fx.CreatePopUpText(_damage.ToString(), _canCrit);
 
         AudioManager.instance.PlaySFX(7);
     }

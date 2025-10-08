@@ -4,66 +4,77 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 物品栏系统 - 管理玩家的装备、背包和仓库
+/// 实现物品的装备、使用、合成和存档功能
+/// 支持装备效果、冷却时间和技能解锁
+/// </summary>
 public class Inventory : MonoBehaviour, ISaveManager
 {
-    public static Inventory instance;
+    public static Inventory instance;                      // 单例实例
 
-    public List<ItemData> startingEquipent;
+    public List<ItemData> startingEquipent;                // 初始装备列表
 
-    public List<InventoryItem> equipment;
-    public Dictionary<ItemData_Equipment, InventoryItem> equipmentDictionary;
+    public List<InventoryItem> equipment;                  // 已装备物品列表
+    public Dictionary<ItemData_Equipment, InventoryItem> equipmentDictionary; // 装备字典
 
-    public List<InventoryItem> inventory;
-    public Dictionary<ItemData, InventoryItem> inventoryDictionary;
+    public List<InventoryItem> inventory;                  // 背包物品列表
+    public Dictionary<ItemData, InventoryItem> inventoryDictionary; // 背包字典
 
-    public List<InventoryItem> stash;
-    public Dictionary<ItemData, InventoryItem> stashDictionary;
+    public List<InventoryItem> stash;                     // 仓库物品列表
+    public Dictionary<ItemData, InventoryItem> stashDictionary; // 仓库字典
 
     [Header("Inventory UI")]
-    [SerializeField] private Transform inventorySlotParent;
-    [SerializeField] private Transform stashSlotParent;
-    [SerializeField] private Transform equipmentSlotParent;
-    [SerializeField] private Transform statSlotParent;
+    [SerializeField] private Transform inventorySlotParent; // 背包槽位父对象
+    [SerializeField] private Transform stashSlotParent;     // 仓库槽位父对象
+    [SerializeField] private Transform equipmentSlotParent; // 装备槽位父对象
+    [SerializeField] private Transform statSlotParent;      // 属性槽位父对象
 
-    private UI_ItemSlot[] inventoryItemSlot;
-    private UI_ItemSlot[] stashItemSlot;
-    private UI_EquipmentSlot[] equipmentSlot;
-    private UI_StatSlot[] statSlot;
+    private UI_ItemSlot[] inventoryItemSlot;               // 背包槽位数组
+    private UI_ItemSlot[] stashItemSlot;                   // 仓库槽位数组
+    private UI_EquipmentSlot[] equipmentSlot;               // 装备槽位数组
+    private UI_StatSlot[] statSlot;                         // 属性槽位数组
 
     [Header("Items cooldown")]
-    private float lastTimeUseWeapon;
-    private float lastTimeUseArmor;
-    private float lastTimeUseAmulet;
-    private float lastTimeUseFlask;
+    private float lastTimeUseWeapon;                        // 上次使用武器时间
+    private float lastTimeUseArmor;                         // 上次使用护甲时间
+    private float lastTimeUseAmulet;                        // 上次使用护身符时间
+    private float lastTimeUseFlask;                         // 上次使用药水时间
 
     [Header("Use amulet")]
-    public bool dashUseAmulet;
-    public bool jumpUseAmulet;
-    public bool swordUseAmulet;
+    public bool dashUseAmulet;                              // 冲刺时使用护身符
+    public bool jumpUseAmulet;                             // 跳跃时使用护身符
+    public bool swordUseAmulet;                            // 剑攻击时使用护身符
 
-    public event Action OnWeaponEquiped;
-    public event Action OnArmorEquiped;
-    public event Action OnAmuletEquiped;
-    public event Action OnFlaskEquiped;
+    // 装备事件
+    public event Action OnWeaponEquiped;                    // 武器装备事件
+    public event Action OnArmorEquiped;                     // 护甲装备事件
+    public event Action OnAmuletEquiped;                    // 护身符装备事件
+    public event Action OnFlaskEquiped;                     // 药水装备事件
 
-    public event Action OnWeaponUnequiped;
-    public event Action OnArmorUnequiped;
-    public event Action OnAmuletUnequiped;
-    public event Action OnFlaskUnequiped;
+    // 卸装事件
+    public event Action OnWeaponUnequiped;                 // 武器卸装事件
+    public event Action OnArmorUnequiped;                  // 护甲卸装事件
+    public event Action OnAmuletUnequiped;                 // 护身符卸装事件
+    public event Action OnFlaskUnequiped;                  // 药水卸装事件
 
-    public event Action OnWeaponUsed;
-    public event Action OnArmorUsed;
-    public event Action OnAmuletUsed;
-    public event Action OnFlaskUsed;
+    // 使用事件
+    public event Action OnWeaponUsed;                       // 武器使用事件
+    public event Action OnArmorUsed;                       // 护甲使用事件
+    public event Action OnAmuletUsed;                      // 护身符使用事件
+    public event Action OnFlaskUsed;                       // 药水使用事件
 
-    [SerializeField] private UI_SkillTreeSlot dashUseAmuletUnlockButton;
-    [SerializeField] private UI_SkillTreeSlot jumpUseAmuletUnlockButton;
-    [SerializeField] private UI_SkillTreeSlot swordUseAmuletUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot dashUseAmuletUnlockButton;   // 冲刺护身符解锁按钮
+    [SerializeField] private UI_SkillTreeSlot jumpUseAmuletUnlockButton;     // 跳跃护身符解锁按钮
+    [SerializeField] private UI_SkillTreeSlot swordUseAmuletUnlockButton;  // 剑攻击护身符解锁按钮
 
     [Header("Database")]
-    public List<InventoryItem> loadedItems;
-    public List<ItemData_Equipment> loadedEquipment;
+    public List<InventoryItem> loadedItems;                // 加载的物品列表
+    public List<ItemData_Equipment> loadedEquipment;       // 加载的装备列表
 
+    /// <summary>
+    /// 初始化单例
+    /// </summary>
     private void Awake()
     {
         if (instance == null)
@@ -72,8 +83,12 @@ public class Inventory : MonoBehaviour, ISaveManager
             Destroy(gameObject);
     }
 
+    /// <summary>
+    /// 初始化物品栏系统
+    /// </summary>
     private void Start()
     {
+        // 初始化字典和列表
         inventory = new List<InventoryItem>();
         inventoryDictionary = new Dictionary<ItemData, InventoryItem>();
 
@@ -83,6 +98,7 @@ public class Inventory : MonoBehaviour, ISaveManager
         equipment = new List<InventoryItem>();
         equipmentDictionary = new Dictionary<ItemData_Equipment, InventoryItem>();
 
+        // 获取UI组件
         inventoryItemSlot = inventorySlotParent.GetComponentsInChildren<UI_ItemSlot>();
         stashItemSlot = stashSlotParent.GetComponentsInChildren<UI_ItemSlot>();
         equipmentSlot = equipmentSlotParent.GetComponentsInChildren<UI_EquipmentSlot>();
@@ -90,11 +106,13 @@ public class Inventory : MonoBehaviour, ISaveManager
 
         AddStartItem();
 
+        // 初始化冷却时间
         lastTimeUseWeapon = -100;
         lastTimeUseArmor = -100;
         lastTimeUseAmulet = -100;
         lastTimeUseFlask = -100;
 
+        // 绑定技能解锁按钮事件
         dashUseAmuletUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockDashUseAmulet);
         jumpUseAmuletUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockJumpUseAmulet);
         swordUseAmuletUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockSwordUseAmulet);
@@ -103,11 +121,16 @@ public class Inventory : MonoBehaviour, ISaveManager
         StartCoroutine(DelayedInitialization());
     }
 
+    /// <summary>
+    /// 添加初始物品
+    /// </summary>
     private void AddStartItem()
     {
+        // 装备加载的装备
         foreach (ItemData_Equipment item in loadedEquipment)
             EquipItem(item);
 
+        // 如果有加载的物品，则添加到背包
         if (loadedItems.Count > 0)
         {
             foreach (InventoryItem item in loadedItems)
@@ -121,10 +144,15 @@ public class Inventory : MonoBehaviour, ISaveManager
             return;
         }
 
+        // 否则添加初始装备
         for (int i = 0; i < startingEquipent.Count; i++)
             AddItem(startingEquipent[i]);
     }
 
+    /// <summary>
+    /// 装备物品
+    /// </summary>
+    /// <param name="_item">要装备的物品</param>
     public void EquipItem(ItemData _item)
     {
         ItemData_Equipment newEquipment = _item as ItemData_Equipment;
@@ -132,21 +160,25 @@ public class Inventory : MonoBehaviour, ISaveManager
 
         ItemData_Equipment itemToRemove = null;
 
+        // 查找同类型装备
         foreach (KeyValuePair<ItemData_Equipment, InventoryItem> item in equipmentDictionary)
             if (item.Key.equipmentType == newEquipment.equipmentType)
                 itemToRemove = item.Key;
 
+        // 如果有同类型装备，先卸装
         if (itemToRemove != null)
         {
             UnequipItem(itemToRemove);
             AddItem(itemToRemove);
         }
 
+        // 装备新物品
         equipment.Add(newItem);
         equipmentDictionary.Add(newEquipment, newItem);
         newEquipment.AddModifiers();
         RemoveItem(_item);
 
+        // 触发装备事件
         switch (newEquipment.equipmentType)
         {
             case EquipmentType.Weapon:
@@ -170,6 +202,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         UpdateSlotUI();
     }
 
+    /// <summary>
+    /// 卸装物品
+    /// </summary>
+    /// <param name="itemToRemove">要卸装的物品</param>
     public void UnequipItem(ItemData_Equipment itemToRemove)
     {
         if (equipmentDictionary.TryGetValue(itemToRemove, out InventoryItem value))
@@ -178,6 +214,7 @@ public class Inventory : MonoBehaviour, ISaveManager
             equipmentDictionary.Remove(itemToRemove);
             itemToRemove.RemoveModifiers();
 
+            // 触发卸装事件
             switch (itemToRemove.equipmentType)
             {
                 case EquipmentType.Weapon:
@@ -196,18 +233,24 @@ public class Inventory : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 更新槽位UI显示
+    /// </summary>
     public void UpdateSlotUI()
     {
+        // 清空所有槽位
         for (int i = 0; i < inventoryItemSlot.Length; i++)
             inventoryItemSlot[i].ClearUpSlot();
         for (int i = 0; i < stashItemSlot.Length; i++)
             stashItemSlot[i].ClearUpSlot();
 
+        // 更新装备槽位
         for (int i = 0; i < equipmentSlot.Length; i++)
             foreach (KeyValuePair<ItemData_Equipment, InventoryItem> item in equipmentDictionary)
                 if (item.Key.equipmentType == equipmentSlot[i].slotType)
                     equipmentSlot[i].UpdateSlot(item.Value);
 
+        // 更新背包和仓库槽位
         for (int i = 0; i < inventory.Count; i++)
             inventoryItemSlot[i].UpdateSlot(inventory[i]);
         for (int i = 0; i < stash.Count; i++)
@@ -216,6 +259,10 @@ public class Inventory : MonoBehaviour, ISaveManager
             statSlot[i].UpdateStatValueUI();
     }
 
+    /// <summary>
+    /// 添加物品到物品栏
+    /// </summary>
+    /// <param name="_item">要添加的物品</param>
     public void AddItem(ItemData _item)
     {
         if (_item.itemType == ItemType.Equipment && CanAddItemToInventory())
@@ -226,6 +273,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         UpdateSlotUI();
     }
 
+    /// <summary>
+    /// 添加物品到仓库
+    /// </summary>
+    /// <param name="_item">要添加的物品</param>
     private void AddToStash(ItemData _item)
     {
         if (stashDictionary.TryGetValue(_item, out InventoryItem value))
@@ -238,6 +289,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 添加物品到背包
+    /// </summary>
+    /// <param name="_item">要添加的物品</param>
     private void AddToInventory(ItemData _item)
     {
         if (inventoryDictionary.TryGetValue(_item, out InventoryItem value))
@@ -250,8 +305,13 @@ public class Inventory : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 移除物品
+    /// </summary>
+    /// <param name="_item">要移除的物品</param>
     public void RemoveItem(ItemData _item)
     {
+        // 从背包中移除
         if (inventoryDictionary.TryGetValue(_item, out InventoryItem inventoryValue))
         {
             if (inventoryValue.stackSize <= 1)
@@ -263,6 +323,7 @@ public class Inventory : MonoBehaviour, ISaveManager
                 inventoryValue.RemoveStack();
         }
 
+        // 从仓库中移除
         if (stashDictionary.TryGetValue(_item, out InventoryItem stashValue))
         {
             if (stashValue.stackSize <= 1)
@@ -277,6 +338,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         UpdateSlotUI();
     }
 
+    /// <summary>
+    /// 检查背包是否有空间
+    /// </summary>
+    /// <returns>是否有空间</returns>
     public bool CanAddItemToInventory()
     {
         if (inventory.Count >= inventoryItemSlot.Length)
@@ -285,17 +350,24 @@ public class Inventory : MonoBehaviour, ISaveManager
         return true;
     }
 
+    /// <summary>
+    /// 检查是否可以合成物品
+    /// </summary>
+    /// <param name="_itemToCraft">要合成的物品</param>
+    /// <param name="_requiredMaterials">所需材料列表</param>
+    /// <returns>是否可以合成</returns>
     public bool CanCraft(ItemData_Equipment _itemToCraft, List<InventoryItem> _requiredMaterials)
     {
         List<InventoryItem> materialsToRemove = new List<InventoryItem>();
 
+        // 检查是否有足够的材料
         for (int i = 0; i < _requiredMaterials.Count; i++)
         {
             if (stashDictionary.TryGetValue(_requiredMaterials[i].data, out InventoryItem stashValue))
             {
                 if (stashValue.stackSize < _requiredMaterials[i].stackSize)
                 {
-                    AudioManager.instance.PlaySFX(29);
+                    AudioManager.instance.PlaySFX(29); // 合成失败音效
                     return false;
                 }
                 else
@@ -305,23 +377,33 @@ public class Inventory : MonoBehaviour, ISaveManager
             }
             else
             {
-                AudioManager.instance.PlaySFX(29);
+                AudioManager.instance.PlaySFX(29); // 合成失败音效
                 return false;
             }
         }
 
+        // 消耗材料并添加合成物品
         for (int i = 0; i < materialsToRemove.Count; i++)
             for (int j = 0; j < materialsToRemove[i].stackSize; j++)
                 RemoveItem(materialsToRemove[i].data);
         AddItem(_itemToCraft);
 
-        AudioManager.instance.PlaySFX(28);
+        AudioManager.instance.PlaySFX(28); // 合成成功音效
 
         return true;
     }
 
+    /// <summary>
+    /// 获取装备列表
+    /// </summary>
+    /// <returns>装备列表</returns>
     public List<InventoryItem> GetEquipmentList() => equipment;
 
+    /// <summary>
+    /// 根据类型获取装备
+    /// </summary>
+    /// <param name="type">装备类型</param>
+    /// <returns>装备数据</returns>
     public ItemData_Equipment GetEquipment(EquipmentType type)
     {
         ItemData_Equipment equipedItem = null;
@@ -333,6 +415,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         return equipedItem;
     }
 
+    /// <summary>
+    /// 检查是否可以使用武器
+    /// </summary>
+    /// <returns>是否可以使用武器</returns>
     public bool CanUseWeapon()
     {
         ItemData_Equipment currentWeapon = GetEquipment(EquipmentType.Weapon);
@@ -343,6 +429,9 @@ public class Inventory : MonoBehaviour, ISaveManager
         return Time.time > lastTimeUseWeapon + currentWeapon.itemCooldown;
     }
 
+    /// <summary>
+    /// 消耗武器冷却时间
+    /// </summary>
     public void ConsumeWeaponCooldown()
     {
         ItemData_Equipment currentWeapon = GetEquipment(EquipmentType.Weapon);
@@ -353,6 +442,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 检查是否可以使用护甲
+    /// </summary>
+    /// <returns>是否可以使用护甲</returns>
     public bool CanUseArmor()
     {
         ItemData_Equipment currentArmor = GetEquipment(EquipmentType.Armor);
@@ -370,6 +463,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         return canUseArmor;
     }
 
+    /// <summary>
+    /// 检查是否可以使用护身符
+    /// </summary>
+    /// <returns>是否可以使用护身符</returns>
     public bool CanUseAmulet()
     {
         ItemData_Equipment currentAmulet = GetEquipment(EquipmentType.Amulet);
@@ -387,6 +484,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         return canUseAmulet;
     }
 
+    /// <summary>
+    /// 检查是否可以使用药水
+    /// </summary>
+    /// <returns>是否可以使用药水</returns>
     public bool CanUseFlask()
     {
         ItemData_Equipment currentFlask = GetEquipment(EquipmentType.Flask);
@@ -399,12 +500,15 @@ public class Inventory : MonoBehaviour, ISaveManager
         {
             lastTimeUseFlask = Time.time;
             OnFlaskUsed?.Invoke();
-            AudioManager.instance.PlaySFX(38);
+            AudioManager.instance.PlaySFX(38); // 药水使用音效
         }
 
         return canUseFlask;
     }
 
+    /// <summary>
+    /// 解锁冲刺时使用护身符
+    /// </summary>
     public void UnlockDashUseAmulet()
     {
         if (dashUseAmuletUnlockButton.CanUnlockSkillSlot() && dashUseAmuletUnlockButton.unlocked)
@@ -413,6 +517,9 @@ public class Inventory : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 解锁跳跃时使用护身符
+    /// </summary>
     public void UnlockJumpUseAmulet()
     {
         if (jumpUseAmuletUnlockButton.CanUnlockSkillSlot() && jumpUseAmuletUnlockButton.unlocked)
@@ -421,6 +528,9 @@ public class Inventory : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 解锁剑攻击时使用护身符
+    /// </summary>
     public void UnlockSwordUseAmulet()
     {
         if (swordUseAmuletUnlockButton.CanUnlockSkillSlot() && swordUseAmuletUnlockButton.unlocked)
@@ -429,8 +539,13 @@ public class Inventory : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 加载存档数据
+    /// </summary>
+    /// <param name="data">游戏数据</param>
     public void LoadData(GameData data)
     {
+        // 加载背包和仓库物品
         foreach (KeyValuePair<string, int> pair in data.inventory)
         {
             foreach (var item in GetItemDatabase())
@@ -445,6 +560,7 @@ public class Inventory : MonoBehaviour, ISaveManager
             }
         }
 
+        // 加载装备
         foreach (string loadedItemId in data.equipmentId)
         {
             foreach (var item in GetItemDatabase())
@@ -457,22 +573,32 @@ public class Inventory : MonoBehaviour, ISaveManager
         }
     }
 
+    /// <summary>
+    /// 保存存档数据
+    /// </summary>
+    /// <param name="data">游戏数据</param>
     public void SaveData(ref GameData data)
     {
         data.inventory.Clear();
 
+        // 保存背包物品
         foreach (KeyValuePair<ItemData, InventoryItem> pair in inventoryDictionary)
             data.inventory.Add(pair.Key.itemId, pair.Value.stackSize);
 
+        // 保存仓库物品
         foreach (KeyValuePair<ItemData, InventoryItem> pair in stashDictionary)
             data.inventory.Add(pair.Key.itemId, pair.Value.stackSize);
 
-        // Ensure equipment list reflects current state instead of accumulating across saves
+        // 确保装备列表反映当前状态而不是在多次保存中累积
         data.equipmentId.Clear();
         foreach (KeyValuePair<ItemData_Equipment, InventoryItem> pair in equipmentDictionary)
             data.equipmentId.Add(pair.Key.itemId);
     }
 
+    /// <summary>
+    /// 获取物品数据库
+    /// </summary>
+    /// <returns>物品数据列表</returns>
     private List<ItemData> GetItemDatabase()
     {
         List<ItemData> itemDatabase = new List<ItemData>();
@@ -492,6 +618,10 @@ public class Inventory : MonoBehaviour, ISaveManager
         return itemDatabase;
     }
 
+    /// <summary>
+    /// 延迟初始化协程
+    /// </summary>
+    /// <returns></returns>
     private System.Collections.IEnumerator DelayedInitialization()
     {
         // 等待一帧，确保所有保存数据都已加载
