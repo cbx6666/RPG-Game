@@ -131,4 +131,3 @@ public class EquipmentUsageManager : MonoBehaviour, IEquipmentUsageManager
         return canUseFlask;
     }
 }
-

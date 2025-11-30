@@ -28,9 +28,6 @@ public class GameBootstrap : MonoBehaviour
     [SerializeField] private EquipmentUsageManager equipmentUsageManager;
     [SerializeField] private AmuletSkillManager amuletSkillManager;
 
-    [Header("Debug")]
-    [SerializeField] private bool debugMode = true;
-
     private void Awake()
     {
         // 确保场景切换时旧的服务不会残留
@@ -45,12 +42,6 @@ public class GameBootstrap : MonoBehaviour
 
         // 3. 初始化外观模式（Facade Pattern）
         GameFacade.Instance.Initialize();
-
-        // 4. 验证服务注册
-        if (debugMode)
-        {
-            ValidateServices();
-        }
     }
 
     /// <summary>
@@ -132,29 +123,6 @@ public class GameBootstrap : MonoBehaviour
         // 游戏事件总线（Observer Pattern）
         GameEventBus eventBus = new GameEventBus();
         ServiceLocator.Instance.RegisterSingleton<GameEventBus>(eventBus);
-    }
-
-    /// <summary>
-    /// 验证服务注册是否成功
-    /// </summary>
-    private void ValidateServices()
-    {
-        // 测试获取服务（使用接口）
-        var audio = ServiceLocator.Instance.Get<IAudioManager>();
-        var game = ServiceLocator.Instance.Get<IGameManager>();
-        var player = ServiceLocator.Instance.Get<IPlayerManager>();
-        var inv = ServiceLocator.Instance.Get<IInventory>();
-        var skill = ServiceLocator.Instance.Get<ISkillManager>();
-        var save = ServiceLocator.Instance.Get<ISaveManagerService>();
-        var dropped = ServiceLocator.Instance.Get<IDroppedItemManager>();
-
-        Debug.Log($"IAudioManager: {(audio != null ? "✓" : "✗")}");
-        Debug.Log($"IGameManager: {(game != null ? "✓" : "✗")}");
-        Debug.Log($"IPlayerManager: {(player != null ? "✓" : "✗")}");
-        Debug.Log($"IInventory: {(inv != null ? "✓" : "✗")}");
-        Debug.Log($"ISkillManager: {(skill != null ? "✓" : "✗")}");
-        Debug.Log($"ISaveManagerService: {(save != null ? "✓" : "✗")}");
-        Debug.Log($"IDroppedItemManager: {(dropped != null ? "✓" : "✗")}");
     }
 }
 

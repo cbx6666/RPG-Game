@@ -1,3 +1,5 @@
+using UnityEngine;
+
 /// <summary>
 /// 护身符技能管理器 - 负责管理护身符技能状态
 /// 将护身符技能状态从 Inventory 中解耦出来
@@ -50,4 +52,3 @@ public class AmuletSkillManager : MonoBehaviour, IAmuletSkillManager
         }
     }
 }
-
