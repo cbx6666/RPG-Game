@@ -12,8 +12,9 @@ public class UI : MonoBehaviour
     [SerializeField] private GameObject popUpTextPrefab;
 
     private bool isOpen;
-    private IAudioManager audioManager;
-    private IGameManager gameManager;
+    
+    // ========== 使用 Facade Pattern 简化服务访问 ==========
+    private GameFacade game => GameFacade.Instance;
 
     public UI_ItemToolTip itemToolTip;
     public UI_StatToolTip statToolTip;
@@ -26,9 +27,6 @@ public class UI : MonoBehaviour
 
     void Start()
     {
-        audioManager = ServiceLocator.Instance.Get<IAudioManager>();
-        gameManager = ServiceLocator.Instance.Get<IGameManager>();
-        
         itemToolTip = UI_ItemToolTip.instance;
         statToolTip = UI_StatToolTip.instance;
         skillToolTip = UI_SkillToolTip.instance;
@@ -44,18 +42,15 @@ public class UI : MonoBehaviour
         {
             if (!isOpen)
             {
-                audioManager.PlaySFX(23);
+                game.PlaySFX(23);
                 SwitchTo(characterUI);
-
-                if (gameManager != null)
-                    gameManager.PauseGame(true);
+                game.PauseGame(true);
             }
             else
             {
                 SwitchTo(inGameUI);
-                if (gameManager != null)
-                    gameManager.PauseGame(false);
-                audioManager.PlaySFX(23);
+                game.PauseGame(false);
+                game.PlaySFX(23);
             }
 
             isOpen = !isOpen;
@@ -149,9 +144,9 @@ public class UI : MonoBehaviour
             tmp.text = text;
     }
 
-    public void RestartGame() => gameManager.ReStartScene();
+    public void RestartGame() => game.RestartScene();
 
-    public void PlayCLickSFX() => audioManager.PlaySFX(25);
+    public void PlayCLickSFX() => game.PlaySFX(25);
 
-    public void PlayButtonSFX() => audioManager.PlaySFX(24);
+    public void PlayButtonSFX() => game.PlaySFX(24);
 }
