@@ -1,18 +1,32 @@
 using UnityEngine;
 
-// ========== Facade Pattern ==========
+// ========== Facade Pattern + Adapter Pattern ==========
+// 
+// 【外观模式 (Facade Pattern)】
 // 目的：为复杂的子系统提供统一的简化接口
 // 作用：隐藏 ServiceLocator 的复杂性，提供便捷的服务访问
-// 优势：
+// 
+// 【适配器模式 (Adapter Pattern)】
+// 目的：将一个接口转换成另一个接口，让原本不兼容的类能一起工作
+// 作用：将 ServiceLocator.Get<T>() 的泛型方法接口适配为简单的属性访问接口
+// 
+// 双重模式优势：
 // 1. 简化客户端代码：不需要知道 ServiceLocator 的存在
-// 2. 降低耦合：客户端只依赖 Facade，不依赖具体 Manager
-// 3. 易于维护：Manager 变更只需修改 Facade
-// 4. 统一入口：所有游戏系统访问入口统一
-// =====================================
+// 2. 接口适配：将 ServiceLocator.Get<T>() 适配为 game.Player, game.Skills 等
+// 3. 降低耦合：客户端只依赖 Facade，不依赖具体 Manager
+// 4. 易于维护：Manager 变更只需修改 Facade
+// 5. 统一入口：所有游戏系统访问入口统一
+// 
+// 适配器模式体现：
+// - Target（目标接口）: 简单的属性访问（game.Player, game.Skills）
+// - Adaptee（被适配者）: ServiceLocator.Get<T>() 泛型方法
+// - Adapter（适配器）: GameFacade 类
+// - Client（客户端）: 使用 GameFacade 的代码
+// ======================================================
 
 /// <summary>
-/// 游戏外观类 - 提供统一的游戏系统访问入口（Facade Pattern）
-/// 隐藏 ServiceLocator 的复杂性，简化客户端代码
+/// 游戏外观类 - 提供统一的游戏系统访问入口
+/// 同时实现外观模式（简化子系统）和适配器模式（适配 ServiceLocator 接口）
 /// </summary>
 public class GameFacade
 {
@@ -68,45 +82,48 @@ public class GameFacade
         instance = null;
     }
 
-    // ========== 便捷访问属性 ==========
+    // ========== 便捷访问属性 - 适配器模式（Adapter Pattern） ==========
+    // 将 ServiceLocator.Get<T>() 的泛型方法接口适配为简单的属性访问
+    // Before: ServiceLocator.Instance.Get<IPlayerManager>()
+    // After:  GameFacade.Instance.Player
 
     /// <summary>
-    /// 玩家管理器
+    /// 玩家管理器 - 适配器属性
     /// </summary>
     public IPlayerManager Player => playerManager;
 
     /// <summary>
-    /// 技能管理器
+    /// 技能管理器 - 适配器属性
     /// </summary>
     public ISkillManager Skills => skillManager;
 
     /// <summary>
-    /// 物品栏系统
+    /// 物品栏系统 - 适配器属性
     /// </summary>
     public IInventory Inventory => inventory;
 
     /// <summary>
-    /// 音频管理器
+    /// 音频管理器 - 适配器属性
     /// </summary>
     public IAudioManager Audio => audioManager;
 
     /// <summary>
-    /// 游戏管理器
+    /// 游戏管理器 - 适配器属性
     /// </summary>
     public IGameManager Game => gameManager;
 
     /// <summary>
-    /// 存档管理器
+    /// 存档管理器 - 适配器属性
     /// </summary>
     public ISaveManagerService Save => saveManager;
 
     /// <summary>
-    /// 掉落物管理器
+    /// 掉落物管理器 - 适配器属性
     /// </summary>
     public IDroppedItemManager DroppedItems => droppedItemManager;
 
     /// <summary>
-    /// 事件总线
+    /// 事件总线 - 适配器属性
     /// </summary>
     public GameEventBus Events => eventBus;
 
