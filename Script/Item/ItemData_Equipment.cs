@@ -85,24 +85,10 @@ public class ItemData_Equipment : ItemData
                 effectExecuted = true;
         }
 
-        // 只有在效果真正执行时才消耗对应装备的冷却时间
-        if (effectExecuted)
+        // 只有在效果真正执行时才消耗武器的冷却时间
+        if (effectExecuted && equipmentType == EquipmentType.Weapon )
         {
-            switch (equipmentType)
-            {
-                case EquipmentType.Weapon:
-                    ServiceLocator.Instance.Get<IInventory>().ConsumeWeaponCooldown();
-                    break;
-                case EquipmentType.Armor:
-                    // 护甲冷却在CanUseArmor中已经处理
-                    break;
-                case EquipmentType.Amulet:
-                    // 护身符冷却在CanUseAmulet中已经处理
-                    break;
-                case EquipmentType.Flask:
-                    // 药瓶冷却在CanUseFlask中已经处理
-                    break;
-            }
+            GameFacade.Instance.EquipmentUsage.ConsumeWeaponCooldown();
         }
     }
 
@@ -171,7 +157,6 @@ public class ItemData_Equipment : ItemData
         AddItemDescription(armor, "护甲");
         AddItemDescription(magicResistence, "魔法抗性");
         AddItemDescription(evasion, "闪避率");
-
        
         builder.AppendLine();
         builder.Append("");

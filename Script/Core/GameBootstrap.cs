@@ -25,6 +25,8 @@ public class GameBootstrap : MonoBehaviour
     [SerializeField] private SkillManager skillManager;
     [SerializeField] private SaveManager saveManager;
     [SerializeField] private DroppedItemManager droppedItemManager;
+    [SerializeField] private EquipmentUsageManager equipmentUsageManager;
+    [SerializeField] private AmuletSkillManager amuletSkillManager;
 
     [Header("Debug")]
     [SerializeField] private bool debugMode = true;
@@ -76,6 +78,12 @@ public class GameBootstrap : MonoBehaviour
 
         if (droppedItemManager == null)
             droppedItemManager = FindObjectOfType<DroppedItemManager>();
+
+        if (equipmentUsageManager == null)
+            equipmentUsageManager = FindObjectOfType<EquipmentUsageManager>();
+
+        if (amuletSkillManager == null)
+            amuletSkillManager = FindObjectOfType<AmuletSkillManager>();
     }
 
     /// <summary>
@@ -111,6 +119,14 @@ public class GameBootstrap : MonoBehaviour
         // 掉落物管理器（通过接口注册）
         if (droppedItemManager != null)
             ServiceLocator.Instance.RegisterSingleton<IDroppedItemManager>(droppedItemManager);
+
+        // 装备使用管理器（通过接口注册）
+        if (equipmentUsageManager != null)
+            ServiceLocator.Instance.RegisterSingleton<IEquipmentUsageManager>(equipmentUsageManager);
+
+        // 护身符技能管理器（通过接口注册）
+        if (amuletSkillManager != null)
+            ServiceLocator.Instance.RegisterSingleton<IAmuletSkillManager>(amuletSkillManager);
 
         // ========== 阶段2：注册事件系统 ==========
         // 游戏事件总线（Observer Pattern）
