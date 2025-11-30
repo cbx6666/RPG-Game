@@ -10,16 +10,24 @@ public enum EquipmentType
 }
 
 // ========== Bridge Pattern (Abstraction) ==========
-// 装备系统采用桥接模式，将装备和效果分离
-// - 装备类型（Weapon, Armor等）可以独立变化
-// - 效果实现（Fire, Heal等）可以独立变化
-// - 通过 itemEffects[] 桥接，灵活组合
+// 目的：将装备和效果分离，使它们可以独立变化
+// 说明：根据官方桥接模式，Abstraction 可以是具体类（如官方示例中的 Abstraction 类）
+// - 使用组合（IItemEffect[]）来桥接效果实现
+// - 核心思想：装备（Abstraction）和效果（Implementor）分离 
+// 核心思想已实现：分离抽象和实现，独立扩展 
+// 适合 Unity ScriptableObject 架构，便于在编辑器中配置
 // ===================================================
 
 /// <summary>
-/// 装备数据 - 抽象部分（Bridge Pattern - Abstraction）
-/// 通过组合 ItemEffect[] 实现效果，而不是继承
+/// 装备数据 - 桥接模式的抽象部分（Bridge Pattern - Abstraction）
+/// 通过组合 IItemEffect[] 实现效果，而不是继承
 /// 这样装备和效果可以独立变化和扩展
+/// 
+/// 说明：根据官方桥接模式定义，Abstraction 可以是具体类。
+/// 当前实现符合桥接模式的核心结构：
+/// - Abstraction: ItemData_Equipment（具体类）
+/// - Implementor: IItemEffect（接口）
+/// - 桥接关系：通过 itemEffects[] 组合效果
 /// </summary>
 [CreateAssetMenu(fileName = "New Item Data", menuName = "Data/Equipment")]
 public class ItemData_Equipment : ItemData
@@ -30,7 +38,9 @@ public class ItemData_Equipment : ItemData
     public float itemCooldown;
     
     // ========== Bridge：桥接到效果实现 ==========
-    public ItemEffect[] itemEffects;  // 桥接：装备持有效果引用，而不是继承
+    // 注意：由于 Unity ScriptableObject 序列化限制，使用 ScriptableObject[] 数组
+    // 在运行时通过 IItemEffect 接口使用，符合桥接模式定义
+    public ScriptableObject[] itemEffects;  // 桥接：装备持有效果引用（运行时转换为 IItemEffect 接口）
     [TextArea]
     public string itemEffectDescription;
 
@@ -68,9 +78,10 @@ public class ItemData_Equipment : ItemData
         bool effectExecuted = false;
 
         // ========== Bridge Pattern：通过桥接调用效果实现 ==========
+        // 将 ScriptableObject 转换为 IItemEffect 接口使用，符合桥接模式定义
         foreach (var item in itemEffects)
         {
-            if (item.ExecuteEffect(position))
+            if (item is IItemEffect effect && effect.ExecuteEffect(position))
                 effectExecuted = true;
         }
 
